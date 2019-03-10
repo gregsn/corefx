@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Collections.Immutable.Covariance;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -890,6 +891,11 @@ namespace System.Collections.Immutable.Tests
             tree.Root.VerifyBalanced();
         }
 
+        private static void VerifyBalanced<T>(IImmutableCovariantList<T> tree)
+        {
+            VerifyBalanced(tree as ImmutableList<T>);
+        }
+
         private struct Person
         {
             public string Name { get; set; }
@@ -907,6 +913,118 @@ namespace System.Collections.Immutable.Tests
             {
                 return obj.Name.GetHashCode();
             }
+        }
+
+        [Fact]
+        public void RandomOperationsTest_Covariant()
+        {
+            int operationCount = this.RandomOperationsCount;
+            var expected = new List<int>();
+            var actual = ImmutableList<int>.Empty as IImmutableCovariantList<int>;
+
+            int seed = unchecked((int)DateTime.Now.Ticks);
+            Debug.WriteLine("Using random seed {0}", seed);
+            var random = new Random(seed);
+
+            for (int iOp = 0; iOp < operationCount; iOp++)
+            {
+                switch ((Operation)random.Next((int)Operation.Last))
+                {
+                    case Operation.Add:
+                        int value = random.Next();
+                        Debug.WriteLine("Adding \"{0}\" to the list.", value);
+                        expected.Add(value);
+                        actual = actual.Add(value);
+                        VerifyBalanced(actual);
+                        break;
+                    case Operation.AddRange:
+                        int inputLength = random.Next(100);
+                        int[] values = Enumerable.Range(0, inputLength).Select(i => random.Next()).ToArray();
+                        Debug.WriteLine("Adding {0} elements to the list.", inputLength);
+                        expected.AddRange(values);
+                        actual = actual.AddRange(values);
+                        VerifyBalanced(actual);
+                        break;
+                    case Operation.Insert:
+                        int position = random.Next(expected.Count + 1);
+                        value = random.Next();
+                        Debug.WriteLine("Adding \"{0}\" to position {1} in the list.", value, position);
+                        expected.Insert(position, value);
+                        actual = actual.Insert(position, value);
+                        VerifyBalanced(actual);
+                        break;
+                    case Operation.InsertRange:
+                        inputLength = random.Next(100);
+                        values = Enumerable.Range(0, inputLength).Select(i => random.Next()).ToArray();
+                        position = random.Next(expected.Count + 1);
+                        Debug.WriteLine("Adding {0} elements to position {1} in the list.", inputLength, position);
+                        expected.InsertRange(position, values);
+                        actual = actual.InsertRange(position, values);
+                        VerifyBalanced(actual);
+                        break;
+                    case Operation.RemoveAt:
+                        if (expected.Count > 0)
+                        {
+                            position = random.Next(expected.Count);
+                            Debug.WriteLine("Removing element at position {0} from the list.", position);
+                            expected.RemoveAt(position);
+                            actual = actual.RemoveAt(position);
+                            VerifyBalanced(actual);
+                        }
+
+                        break;
+                    case Operation.RemoveRange:
+                        position = random.Next(expected.Count);
+                        inputLength = random.Next(expected.Count - position);
+                        Debug.WriteLine("Removing {0} elements starting at position {1} from the list.", inputLength, position);
+                        expected.RemoveRange(position, inputLength);
+                        actual = actual.RemoveRange(position, inputLength);
+                        VerifyBalanced(actual);
+                        break;
+                }
+
+                Assert.Equal<int>(expected, actual);
+            }
+        }
+
+        interface IFruit
+        {
+        }
+
+        class Banana : IFruit
+        {
+        }
+
+        class Apple : IFruit
+        {
+        }
+
+        [Fact]
+        public void CovariantPlugAndPlay()
+        {
+            var firstBanana = new Banana();
+            var bananas = ImmutableList<Banana>.Empty;
+
+            bananas = bananas.Add(firstBanana);
+
+            // add an apple to the banana(s) and you get fruits
+            var fruits = bananas.Add<IFruit>(new Apple()); 
+            Assert.Equal(fruits.Count, 2);
+
+            // add a banana and you still have bananas
+            bananas = bananas.Add(new Banana());
+            Assert.Equal(bananas.Count, 2);
+
+            // bananas can be seen as fruits
+            fruits = bananas;
+
+            var anotherApple = new Apple();
+
+            // again messing with bananas that get confronted with apples all of a sudden
+            IEnumerable<IFruit> applefollowedByBanana = bananas.SetItem<IFruit>(0, anotherApple);
+            IEnumerable<IFruit> applefollowedByBanana2 = bananas.Replace(firstBanana, anotherApple, EqualityComparer<IFruit>.Default);
+
+            Assert.Equal(applefollowedByBanana, applefollowedByBanana2);
         }
     }
 }

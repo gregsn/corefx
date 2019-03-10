@@ -7,6 +7,10 @@
 
 namespace System.Collections.Immutable
 {
+    public partial interface IImmutableCovariantList<out T> : System.Collections.Generic.IEnumerable<T>, System.Collections.Generic.IReadOnlyCollection<T>, System.Collections.Generic.IReadOnlyList<T>, System.Collections.IEnumerable
+    {
+    }
+
     public partial interface IImmutableDictionary<TKey, TValue> : System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.Generic.IReadOnlyCollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.Generic.IReadOnlyDictionary<TKey, TValue>, System.Collections.IEnumerable
     {
         System.Collections.Immutable.IImmutableDictionary<TKey, TValue> Add(TKey key, TValue value);
@@ -529,7 +533,7 @@ namespace System.Collections.Immutable
         public static System.Collections.Immutable.ImmutableList<TSource> ToImmutableList<TSource>(this System.Collections.Generic.IEnumerable<TSource> source) { throw null; }
         public static System.Collections.Immutable.ImmutableList<TSource> ToImmutableList<TSource>(this System.Collections.Immutable.ImmutableList<TSource>.Builder builder) { throw null; }
     }
-    public sealed partial class ImmutableList<T> : System.Collections.Generic.ICollection<T>, System.Collections.Generic.IEnumerable<T>, System.Collections.Generic.IList<T>, System.Collections.Generic.IReadOnlyCollection<T>, System.Collections.Generic.IReadOnlyList<T>, System.Collections.ICollection, System.Collections.IEnumerable, System.Collections.IList, System.Collections.Immutable.IImmutableList<T>
+    public sealed partial class ImmutableList<T> : System.Collections.Generic.ICollection<T>, System.Collections.Generic.IEnumerable<T>, System.Collections.Generic.IList<T>, System.Collections.Generic.IReadOnlyCollection<T>, System.Collections.Generic.IReadOnlyList<T>, System.Collections.ICollection, System.Collections.IEnumerable, System.Collections.IList, System.Collections.Immutable.IImmutableList<T>, System.Collections.Immutable.IImmutableCovariantList<T>
     {
         internal ImmutableList() { }
         public static readonly System.Collections.Immutable.ImmutableList<T> Empty;
@@ -1042,6 +1046,27 @@ namespace System.Collections.Immutable
         }
     }
 }
+namespace System.Collections.Immutable.Covariance
+{
+    public static class ImmutableCovariantList
+    {
+        public static IImmutableCovariantList<T> Clear<T>(this IImmutableCovariantList<T> list) { throw null; }
+        public static int IndexOf<T>(this IImmutableCovariantList<T> list, T item, int index, int count, System.Collections.Generic.IEqualityComparer<T> equalityComparer) { throw null; }
+        public static int LastIndexOf<T>(this IImmutableCovariantList<T> list, T item, int index, int count, System.Collections.Generic.IEqualityComparer<T> equalityComparer) { throw null; }
+        public static IImmutableCovariantList<T> Add<T>(this IImmutableCovariantList<T> list, T value) { throw null; }
+        public static IImmutableCovariantList<T> AddRange<T>(this IImmutableCovariantList<T> list, System.Collections.Generic.IEnumerable<T> items) { throw null; }
+        public static IImmutableCovariantList<T> Insert<T>(this IImmutableCovariantList<T> list, int index, T element) { throw null; }
+        public static IImmutableCovariantList<T> InsertRange<T>(this IImmutableCovariantList<T> list, int index, System.Collections.Generic.IEnumerable<T> items) { throw null; }
+        public static IImmutableCovariantList<T> Remove<T>(this IImmutableCovariantList<T> list, T value, System.Collections.Generic.IEqualityComparer<T> equalityComparer) { throw null; }
+        public static IImmutableCovariantList<T> RemoveAll<T>(this IImmutableCovariantList<T> list, Predicate<T> match) { throw null; }
+        public static IImmutableCovariantList<T> RemoveRange<T>(this IImmutableCovariantList<T> list, System.Collections.Generic.IEnumerable<T> items, System.Collections.Generic.IEqualityComparer<T> equalityComparer) { throw null; }
+        public static IImmutableCovariantList<T> RemoveRange<T>(this IImmutableCovariantList<T> list, int index, int count) { throw null; }
+        public static IImmutableCovariantList<T> RemoveAt<T>(this IImmutableCovariantList<T> list, int index) { throw null; }
+        public static IImmutableCovariantList<T> SetItem<T>(this IImmutableCovariantList<T> list, int index, T value) { throw null; }
+        public static IImmutableCovariantList<T> Replace<T>(this IImmutableCovariantList<T> list, T oldValue, T newValue, System.Collections.Generic.IEqualityComparer<T> equalityComparer) { throw null; }
+    }
+}
+
 namespace System.Linq
 {
     public static partial class ImmutableArrayExtensions
